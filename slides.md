@@ -1,7 +1,9 @@
 ---
-theme: seriph
-background: ""
-class: "bg-gradient-to-r from-gray-100 to-gray-400 dark:from-gray-700 dark:to-gray-900 p-0"
+theme: ./theme
+background: ''
+class: >-
+  bg-gradient-to-r from-gray-100 to-gray-400 dark:from-gray-700 dark:to-gray-900
+  p-0
 highlighter: shiki
 lineNumbers: false
 drawings:
@@ -13,6 +15,7 @@ title: SvelteKit - beyond the basics
 # Building _efficient_ and _resilient_ web apps with SvelteKit
 
 <img class="mt-20" src="/svelte-machine.png" />
+
 
 ---
 
