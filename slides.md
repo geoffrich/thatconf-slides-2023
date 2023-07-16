@@ -10,9 +10,7 @@ transition: slide-left
 title: SvelteKit - beyond the basics
 ---
 
-# Web development, streamlined
-
-## An introduction to SvelteKit
+# Building _efficient_ and _resilient_ web apps with SvelteKit
 
 <img class="mt-20" src="/svelte-machine.png" />
 
@@ -45,11 +43,80 @@ title: SvelteKit - beyond the basics
 
 ---
 
+# What this talk is
+
+- building **efficient** and **resilient** web apps
+- a bit of a grab bag
+- moving beyond the basics of SvelteKit (w/ a quick recap)
+- practical examples - "Sveltunes"
+
+---
+layout: two-cols
+---
+
+# efficiency
+
+- only fetch what you need
+- fetch in parallel
+- prefetch when you can
+- avoid re-fetching
+- fetch at build time
+- minimal boilerplate (efficiency while authoring)
+- ship less JS
+
+::right::
+
+# resiliency
+
+- JS is an enhancement
+- building on the web platform (links & forms)
+- typesafety
+- prerendering
+
+<!--
+TODO should I talk about all this up front?
+-->
+
+---
+layout: center
+---
+
+## previously, on
+
+<div class="relative">
+
+<img class="svelte" width="300" src="/svelte-logo.svg">
+
+<img src="/arrested-development.jpg">
+
+</div>
+
+<svg class="w-full h-full absolute top-0 left-1 touch-none"><path fill="#ff595e" d="M 262.67 250.67 Q 262.67 250.67 267.89 248.68 273.11 246.68 279.17 246.68 285.23 246.68 291.93 246.68 298.62 246.68 307.51 246.68 316.39 246.68 328.96 246.68 341.52 246.68 356.48 246.68 371.43 246.68 385.47 246.68 399.51 246.68 412.90 246.68 426.28 246.68 438.56 246.68 450.84 246.68 461.00 246.68 471.16 246.68 480.42 246.68 489.68 246.68 497.46 246.68 505.24 246.68 511.02 246.68 516.80 246.68 522.28 246.68 527.75 246.68 532.55 246.68 537.35 246.68 541.31 246.68 545.27 246.68 548.61 246.68 551.94 246.68 555.00 246.68 558.06 246.68 560.46 246.68 562.86 246.68 565.26 246.68 567.65 246.68 570.04 246.68 572.43 246.68 574.82 246.68 577.21 246.68 579.32 246.68 581.44 246.68 583.44 246.68 585.44 246.68 587.43 246.98 589.42 247.29 592.75 247.73 596.07 248.18 599.78 248.65 603.49 249.12 607.01 249.29 610.53 249.46 612.68 249.79 614.84 250.11 617.09 250.21 619.34 250.32 622.17 250.66 625.00 251.00 627.65 251.13 630.30 251.26 633.27 251.60 636.24 251.95 639.91 252.36 643.57 252.78 647.74 253.52 651.90 254.27 655.25 254.85 658.60 255.43 661.92 255.95 665.23 256.47 668.56 256.96 671.90 257.45 675.07 257.65 678.25 257.84 681.43 258.22 684.61 258.59 687.61 259.03 690.62 259.46 693.10 259.63 695.57 259.80 697.99 259.87 700.40 259.94 702.80 259.98 705.19 260.01 707.31 260.02 709.43 260.03 712.71 260.04 715.99 260.05 719.32 260.05 722.65 260.05 725.21 260.06 727.76 260.06 730.19 260.06 732.61 260.06 735.69 260.46 738.78 260.86 741.29 260.93 743.80 261.00 746.66 261.45 749.53 261.89 753.00 263.93 756.47 265.96 756.47 265.96 756.47 265.97 756.47 265.97 756.47 265.98 754.62 267.92 752.77 269.87 750.47 269.79 748.17 269.70 745.94 269.35 743.71 269.00 740.87 268.91 738.03 268.82 735.31 268.44 732.59 268.05 730.18 268.06 727.76 268.06 725.20 268.06 722.65 268.05 719.31 268.05 715.97 268.05 712.67 268.04 709.38 268.03 707.23 268.02 705.08 268.01 702.62 267.97 700.15 267.94 697.59 267.86 695.02 267.78 692.24 267.58 689.47 267.38 686.57 266.96 683.67 266.53 680.71 266.18 677.75 265.83 674.24 265.60 670.72 265.37 667.36 264.87 664.00 264.37 660.62 263.84 657.23 263.31 653.86 262.73 650.48 262.14 646.58 261.44 642.67 260.73 638.99 260.31 635.30 259.89 632.60 259.57 629.90 259.25 626.97 259.10 624.03 258.94 621.48 258.63 618.93 258.31 616.26 258.16 613.60 258.01 609.94 257.67 606.29 257.33 602.51 256.85 598.73 256.38 596.68 256.21 594.62 256.05 591.37 255.61 588.13 255.18 584.78 254.93 581.44 254.68 579.32 254.68 577.21 254.68 574.82 254.68 572.43 254.68 570.04 254.68 567.65 254.68 565.26 254.68 562.86 254.68 560.46 254.68 558.06 254.68 555.00 254.68 551.94 254.68 548.61 254.68 545.27 254.68 541.31 254.68 537.35 254.68 532.55 254.68 527.75 254.68 522.28 254.68 516.80 254.68 511.02 254.68 505.24 254.68 497.46 254.68 489.68 254.68 480.42 254.68 471.16 254.68 461.00 254.68 450.84 254.68 438.56 254.68 426.28 254.68 412.90 254.68 399.51 254.68 385.47 254.68 371.43 254.68 356.48 254.68 341.52 254.68 328.96 254.68 316.39 254.68 307.51 254.68 298.62 254.68 291.93 254.68 285.23 254.68 279.17 254.68 273.11 254.68 267.89 252.69 262.67 250.69 262.67 250.68 Z"></path></svg>
+
+<style>
+  .svelte {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 50px;
+  }
+
+</style>
+
+
+<!--
+Svelte/Svelte
+
+but if you're here and are completely new to Svelte or SvelteKit, quick recap
+-->
+
+---
+
 # What is Svelte?
 
 - component-based JS framework
 - uses a compiler
-- smaller & faster* apps
+- smaller & faster apps
 
 <style>
   ul {
@@ -58,7 +125,6 @@ title: SvelteKit - beyond the basics
 </style>
 
 <!--
-- [ show of hands — who has heard of Svelte? used Svelte? ]
 - So Svelte has been getting fairly well known these days, but in case this is your first time hearing about it — it is a component-based JavaScript framework like React and Vue, but the major difference is instead of interpreting your component code with a runtime it ships to the browser, it compiles your components into vanilla JavaScript at build time. So on average, this makes for applications that are typically smaller and faster than applications built with the other big frameworks.
 -->
 
@@ -141,6 +207,8 @@ Svelte just says here’s a component language, it’s up to you to wire everyth
 it’s the Svelte team’s recommended way to build any app with Svelte.
 
 Svelte is individual legos, SvelteKit helps assemble those legos into a full build
+
+today we're going to focus a lot on data loading and form handling
 -->
 
 ---
@@ -174,15 +242,13 @@ If you’re familiar with the React ecosystem, think of it like NextJS or Remix,
 -->
 
 ---
+layout: fact
+---
 
-# Plan for today
-
-- TODO update
-
-<img src="/learn-svelte-dev.png" class="pt-10">
+# What are the SvelteKit basics?
 
 <!--
-Will be doing a live demo to see it in action, but this isn’t the right place for a full tutorial. If you want that, learn.svelte.dev
+let's level-set on what SvelteKit provides
 -->
 
 ---
@@ -207,6 +273,8 @@ src/
 ```
 
 <!--
+TODO this examples should use Sveltunes
+
 Folders create routes
 
 To know what renders at any given URL, you go to the corresponding folder
@@ -216,46 +284,6 @@ To know what renders at any given URL, you go to the corresponding folder
 by default, SvelteKit will server render each route for the initial request, for good SEO and so that users see content right away
 
 and then after the initial load, SK will use client-side navigation for a snappy, app-like experience
--->
-
----
-
-# Loading data: before SvelteKit
-
-```svelte
-<script>
-  import { onMount } from 'svelte';
-
-  let data;
-
-  onMount(() => {
-    fetch('/api/items')
-      .then(r => r.json())
-      .then(result => {
-        data = result;
-      });
-  });
-</script>
-```
-
-<br>
-
-<v-clicks>
-
-- doesn't start until JS parsed & component rendered
-- boilerplate
-- users without JS are out of luck
-
-</v-clicks>
-
-<!--
-most apps need to load data - here's how you'd do that in pure svelte
-
-parsing/loading/error handling all by yourself
-
-issues with this approach
-
-this still works in SvelteKit but there's a better way
 -->
 
 ---
@@ -376,7 +404,7 @@ form has seen a bit of a comeback lately in the JS framework world (Remix, Next,
 
 SK also likes forms
 
-- progressive enhancement
+this ties into _resiliency_, will talk more later
 -->
 
 ---
