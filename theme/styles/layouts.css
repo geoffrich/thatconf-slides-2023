@@ -8,7 +8,7 @@
   }
 
   h1 + p {
-    @apply -mt-2 opacity-50 mb-4;
+    @apply mb-4;
   }
 
   p + h2, ul + h2, table + h2 {
@@ -41,6 +41,19 @@
 
   h6:not(.opacity-100) {
     @apply opacity-40;
+  }
+
+  ul {
+    font-size: 1.5rem;
+  }
+
+  p {
+    font-size: 2rem;
+  }
+
+  :where(pre) {
+    --slidev-code-font-size: 1.5rem;
+    --slidev-code-line-height: 1.5;
   }
 }
 

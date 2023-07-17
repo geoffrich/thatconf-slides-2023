@@ -117,25 +117,39 @@ but if you're here and are completely new to Svelte or SvelteKit, quick recap
 
 # What is Svelte?
 
-- component-based JS framework
-- uses a compiler
-- smaller & faster apps
+a _component-based JS framework_ that uses a <span class="svelte">compiler</span>
 
 <style>
-  ul {
-    font-size: 1.5rem;
+  h1 {
+    text-align: center;
+    font-size: 3rem !important;
+  }
+
+  p {
+    text-align: center;
+    display: block;
+    margin-top: 7rem !important;
+    font-size: 3rem;
+    line-height: 1.5 !important;
+    opacity: 1 !important;
+  }
+
+  .svelte {
+    background-color: hsl(15, 100%, 40%);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    font-weight: bold;
   }
 </style>
 
 <!--
-- So Svelte has been getting fairly well known these days, but in case this is your first time hearing about it — it is a component-based JavaScript framework like React and Vue, but the major difference is instead of interpreting your component code with a runtime it ships to the browser, it compiles your components into vanilla JavaScript at build time. So on average, this makes for applications that are typically smaller and faster than applications built with the other big frameworks.
+- [ show of hands — who has heard of Svelte? used Svelte? ]
+- So Svelte has been getting fairly well known these days, but in case this is your first time hearing about it — it is a component-based JavaScript framework like React and Vue, but the major difference is instead of interpreting your component code with a runtime it ships to the browser, it compiles your components into vanilla JavaScript at build time. So the advantage of this is that you can ship less JavaScript to your users, and your application has to do less work because it has compiled away a lot at build time
 -->
 
 ---
 
-# Minimal boilerplate
-
-```svelte {all|2,6|2,6,9-11|2,3,6,7|9-19|all}
+```svelte {all|2,6|2,6,9-11|2,3,6,7|9-19|all} {maxHeight:'500px'}
 <script>
   let count = 0;
   $: doubled = count * 2;
@@ -158,6 +172,8 @@ but if you're here and are completely new to Svelte or SvelteKit, quick recap
 ```
 
 <!--
+[ don't dwell too long on this ]
+
 But for me, the reason I love svelte is not because it's the smallest or the fastest framework -- it does well there, but it's not #1
 
 It's how productive it feels to write Svelte components.
@@ -170,18 +186,18 @@ This is what a Svelte component looks like
 - State
 - Updating state
 - Reactive state
-- Scoped styles
+- Scoped styles (batteries included)
 
 That's Svelte, if it's new to you I recommend giving it a try
 
-Svelte is my favorite way to write UI components, but when building a web app you often need more than just a way to write components. That’s where SvelteKit comes in
+Svelte is my favorite way to write UI components, but when building a web app you often need more than just a way to write components. 
 -->
 
 ---
 
-# What SvelteKit handles
+# Production app requirements
 
-<div class="grid grid-cols-2 gap-6 text-2xl">
+<v-clicks>
 
 - router
 - data loading
@@ -191,27 +207,30 @@ Svelte is my favorite way to write UI components, but when building a web app yo
 - deployment
 - and more!
 
-<img src="/legos.jpg" width="300" height="200">
-
-</div>
-
+</v-clicks>
 
 <!--
-SvelteKit - everything you need to build a full app or website
+There are all these things that go into building a full web app that a component framework doesn't handle
 
-handles the layer on top of your Svelte components 
+while you can answer all these yourself or find packages on npm, it would be nice to have a framework that already answers these questions so you don't have to
 
-So you don't have to provide answers for all these things yourself
+and that's what SvelteKit does
+-->
 
-"metaframework"
+---
+layout: center
+---
 
-Svelte just says here’s a component language, it’s up to you to wire everything together, figure out how to deploy it. SvelteKit provides structure & conventions and lets you spend your time building instead of configuring 
+<img src="/sveltekit-logo.png">
+
+<!--
+
+SvelteKit brings everything you need to build a full app or website
+
+Svelte just says here’s a component language, it’s up to you to wire everything together, figure out how to deploy it. SvelteKit provides structure & conventions and lets you spend your time building instead of configuring and choosing between packages on npm
 
 it’s the Svelte team’s recommended way to build any app with Svelte.
 
-Svelte is individual legos, SvelteKit helps assemble those legos into a full build
-
-today we're going to focus a lot on data loading and form handling
 -->
 
 ---
@@ -276,7 +295,7 @@ src/
 ```
 
 <!--
-TODO this examples should use Sveltunes
+TODO this example should use Sveltunes
 
 Folders create routes
 
@@ -293,14 +312,6 @@ and then after the initial load, SK will use client-side navigation for a snappy
 
 # Loading data: the load function
 
-```text {all|3-4|3,5}
-src/
-├─ routes/
-│  ├─ about/
-│  │  ├─ +page.svelte
-│  │  ├─ +page.server.js
-```
-
 <br>
 
 <div class="grid grid-cols-2 gap-6">
@@ -308,9 +319,10 @@ src/
 <div>
 +page.server.js
 
-```js
+```js {all|2-6}
 export async function load() {
-	const items = await api.getItems();
+	const items = 
+      await api.getItems();
 	return {
 		items
 	};
@@ -321,7 +333,7 @@ export async function load() {
 <div>
 +page.svelte
 
-```svelte
+```svelte {all|2|2,6-8}
 <script>
   export let data;
 </script>
@@ -337,6 +349,12 @@ export async function load() {
 </div>
 
 <!--
+TODO sveltunes example 
+
+similarly, most apps need a way to load data
+
+in SK: the load function
+
 loads the data for the page
 
 when you navigate to this route, SK will call the load function
@@ -353,20 +371,18 @@ available in the data prop
 <div>
 +page.svelte
 
-```svelte {1-5|6-23}
-<form method="POST" action="/?login">
-  <label>Username <input type="text" name="username"></label>
-  <label>Password <input type="password" name="password"></label>
-  <button>Log in</button>
-</form>
-
-<script>
-  import { enhance } from '$app/forms';
-</script>
-
-<form method="POST" action="/?login" use:enhance>
-  <label>Username <input type="text" name="username"></label>
-  <label>Password <input type="password" name="password"></label>
+```svelte {all|3|5-7,9-11|all}
+<form 
+    method="POST" 
+    action="/?login">
+  <label>Username 
+    <input 
+      type="text" 
+      name="username"></label>
+  <label>Password 
+    <input 
+      type="password" 
+      name="password"></label>
   <button>Log in</button>
 </form>
 ```
@@ -375,30 +391,31 @@ available in the data prop
 <div>
 +page.server.js
 
-```js
+```js {all|3-8|all}
 export const actions = {
   login: async ({ request }) => {
-    // log the user in
-    const data = await request.formData();
-    const username = data.get('username');
-    const password = data.get('password');
-    await performLogin({ username, password });
+    const data = 
+        await request.formData();
+    const username = 
+        data.get('username');
+    const password = 
+        data.get('password');
+    await performLogin({ 
+      username, password 
+    });
   }
 }
 ```
 
-<br>
-
-<div v-click>
-
-- with `use:enhance`, the form will submit without reloading the page
-- can pass a callback to customize the behavior
-
 </div>
 
 </div>
 
-</div>
+<style>
+  pre {
+    --slidev-code-font-size: 1.3rem;
+  }
+</style>
 
 <!--
 just like most apps need to load data, most apps need to mutate data
