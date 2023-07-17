@@ -54,33 +54,6 @@ title: SvelteKit - beyond the basics
 - practical examples - "Sveltunes"
 
 ---
-layout: two-cols
----
-
-# efficiency
-
-- only fetch what you need
-- fetch in parallel
-- prefetch when you can
-- avoid re-fetching
-- fetch at build time
-- minimal boilerplate (efficiency while authoring)
-- ship less JS
-
-::right::
-
-# resiliency
-
-- JS is an enhancement
-- building on the web platform (links & forms)
-- typesafety
-- prerendering
-
-<!--
-TODO should I talk about all this up front?
--->
-
----
 layout: center
 ---
 
@@ -210,6 +183,8 @@ Svelte is my favorite way to write UI components, but when building a web app yo
 </v-clicks>
 
 <!--
+TODO maybe drop/fold into next slide
+
 There are all these things that go into building a full web app that a component framework doesn't handle
 
 while you can answer all these yourself or find packages on npm, it would be nice to have a framework that already answers these questions so you don't have to
@@ -267,10 +242,35 @@ If you’re familiar with the React ecosystem, think of it like NextJS or Remix,
 layout: fact
 ---
 
-# What are the SvelteKit basics?
+# efficiency and resiliency
 
 <!--
-let's level-set on what SvelteKit provides
+what this talk is about
+
+let's start with efficiency
+-->
+
+---
+layout: fact
+---
+
+# efficiency: minimizing waste
+
+---
+
+# efficient developer experience (DX)
+
+- writing Svelte components
+  - `let count = 3`
+  - `$: doubled = count * 2`
+- directory-based routing
+
+<!--
+when you're writing Svelte/SvelteKit, the code you write is efficient to read and efficient to author
+
+Svelte components: state is a variable that you read and update, $: syntax
+
+directory based routing in SvelteKit [ next slide ]
 -->
 
 ---
@@ -299,13 +299,42 @@ TODO this example should use Sveltunes
 
 Folders create routes
 
-To know what renders at any given URL, you go to the corresponding folder
+efficient: To know what renders at any given URL, you go to the corresponding folder
 
-`<a>` link between them - no link component
+can also see what data is being loaded on a given page and what actions there are by looking in +page.server.js
+-->
 
-by default, SvelteKit will server render each route for the initial request, for good SEO and so that users see content right away
+---
 
-and then after the initial load, SK will use client-side navigation for a snappy, app-like experience
+# efficient JS payloads
+
+- code splitting
+- minimizing bundle size
+
+<img src="/js-baseline.png" height="300" width="400">
+
+[https://www.zachleat.com/web/site-generator-review/#client-javascript-baseline](https://www.zachleat.com/web/site-generator-review/#client-javascript-baseline)
+
+<style>
+  a {
+    font-size: 1rem;
+  }
+</style>
+
+<!--
+code-splitting: code will be split between routes, depending on usage
+
+Svelte components have pretty minimal bundle size -- compared to other similar SPA frameworks, SK ships significantly less JS (though no-JS-by-default frameworks still win out)
+-->
+
+---
+layout: fact
+---
+
+# efficient data loading
+
+<!--
+where I want to spend most time
 -->
 
 ---
@@ -361,6 +390,92 @@ when you navigate to this route, SK will call the load function
 
 available in the data prop
 -->
+
+---
+
+# Loading data: before SvelteKit
+
+```svelte
+<script>
+  import { onMount } from 'svelte';
+
+  let data;
+  onMount(() => {
+    fetch('/api/items')
+      .then(r => r.json())
+      .then(result => {
+        data = result;
+      });
+  });
+</script>
+```
+
+<!--
+compare this to how you'd do it in pure Svelte
+
+more boilerplate, but also less efficient
+-->
+
+---
+
+# Comparing `onMount` and `load`
+
+<div class="grid gap-6 grid-cols-2">
+<div>
+
+## `load`
+
+<v-clicks>
+
+- more efficient to author
+- makes data loading discoverable by the framework
+  - type-safe data loading
+  - preloading on hover
+  - can SSR page data (return actual HTML)
+- only at the page level
+
+</v-clicks>
+
+</div>
+
+<div>
+
+## `onMount`
+
+<v-clicks>
+
+- more boilerplate
+- not discoverable by the framework
+- no type-safety / preloading / SSR
+- can fetch at component level (though less efficiently)
+
+</v-clicks>
+
+</div>
+</div>
+
+<!--
+let's compare the two approaches and explain why load is more efficient
+
+onMount fetches after JS parse + render
+
+type-safety -- efficient DX (don't have to figure out what data is available or keep types in sync yourself) and also resilient (know at build time if you messed up the types)
+
+TODO: demo how this works in Sveltunes on album page?
+
+so that's why load is more efficient. but the load function also has a lot more features that help you deliver an efficient experience
+-->
+
+---
+
+# layout loads
+
+<!--
+load functions aren't just for pages
+
+
+-->
+
 
 ---
 
@@ -455,6 +570,33 @@ very few people disable JS. but it's common for people to be in situations where
 If all your logic is in JS, if your JS fails to load, then you're out of luck
 
 But if your app is SvelteKit (or another framework that prioritizes PE), the defaults will ensure some functionality (SSR, links to navigate, forms submit data)
+-->
+
+---
+layout: two-cols
+---
+
+# efficiency
+
+- only fetch what you need
+- fetch in parallel
+- prefetch when you can
+- avoid re-fetching
+- fetch at build time
+- minimal boilerplate (efficiency while authoring)
+- ship less JS
+
+::right::
+
+# resiliency
+
+- JS is an enhancement
+- building on the web platform (links & forms)
+- typesafety
+- prerendering
+
+<!--
+recap
 -->
 
 ---
