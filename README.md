@@ -12,6 +12,6 @@ Learn more about Slidev on [documentations](https://sli.dev/).
 
 TODO
 
-- bump font size
-- figure out what to show/hide
-- post slides
+- add slide introing demo app somewhere
+- add THAT slides
+- simplify examples

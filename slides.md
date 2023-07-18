@@ -471,9 +471,59 @@ so that's why load is more efficient. but the load function also has a lot more 
 # layout loads
 
 <!--
-load functions aren't just for pages
+TODO: explain layout?
 
+page load function => loads data needed by that page
 
+what if you have data that is needed by multiple pages?
+
+example: login state (TODO: better example? since we're returning locals, it isn't actually a fetch. maybe list of favorites)
+- nav needs it to show login/favorites links
+- each album needs it to determine whether to show favorite button
+
+you could fetch it in each page load - but that's inefficient, since you'd keep loading on each navigation when the data doesn't change
+
+TODO: visualize where login state is used, fetching in each page load
+
+however, that's not efficient since if I navigate between albums, we keep loading the same data
+
+instead: move the load to a layout. just like layouts reduce UI duplication, they can also reduce data loading duplication
+
+TODO: elaborate. when data is reloaded, data is merged into the data prop
+
+show example on Sveltunes
+-->
+
+---
+
+# loading data in parallel
+
+<!--
+important to understand that SvelteKit doesn't run these load function sequentially (layout load => page load)
+
+instead, they're run in parallel
+
+which is good: list of favorites and album info are separate, they don't need to wait for each other
+
+this is also a principle you should follow inside single load functions
+
+on the artist page: artist info and list of releases are two separate api calls. instead of awaiting one and then the other, fire them both at the same time [this is handwaving the streamed promise behavior]
+
+alternatively: return them directly and SvelteKit will await them in parallel for you
+-->
+
+---
+
+# waiting for the parent data
+
+<!--
+though sometimes you need the parent data - you can use await parent
+
+you want to be careful, because when you do this the rest of your load function will stop executing in parallel
+
+if you're making other api calls, fire those off first (just like making api calls in parallel)
+
+one example where this can be useful: favorites. all data loading is in layout, pages just extract data from that
 -->
 
 
