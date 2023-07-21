@@ -9,13 +9,29 @@ lineNumbers: false
 drawings:
   persist: false
 transition: slide-left
-title: SvelteKit - beyond the basics
+title: Building efficient and resilient web apps with SvelteKit
 ---
 
 # Building _efficient_ and _resilient_ web apps with SvelteKit
 
 <img class="mt-20" src="/svelte-machine.png" />
 
+
+---
+
+# What this talk is
+
+- building **efficient** and **resilient** web apps
+- a bit of a grab bag
+- moving beyond the basics of SvelteKit (w/ a quick recap)
+- practical examples - "Sveltunes"
+
+<!--
+
+[ TODO have better talk hook/intro ]
+
+"Building web apps with all the modern best practices can be complicated. Not only do you want your app to be *efficient* and load data quickly and intelligently, you also want it to be *resilient* and stay upright regardless of your users’ device or network. "
+-->
 
 ---
 
@@ -43,15 +59,6 @@ title: SvelteKit - beyond the basics
     gap: 2rem;
   }
 </style>
-
----
-
-# What this talk is
-
-- building **efficient** and **resilient** web apps
-- a bit of a grab bag
-- moving beyond the basics of SvelteKit (w/ a quick recap)
-- practical examples - "Sveltunes"
 
 ---
 layout: center
@@ -245,7 +252,9 @@ layout: fact
 # efficiency and resiliency
 
 <!--
-what this talk is about
+today I want to talk about building apps with SK, and specifically building apps that are efficient and resilient
+
+going to demonstrate using a demo app I built, Sveltunes
 
 let's start with efficiency
 -->
@@ -255,6 +264,10 @@ layout: fact
 ---
 
 # efficiency: minimizing waste
+
+<!--
+we're going to mainly focus on data loading but I think other aspects of developing with SK are efficient too
+-->
 
 ---
 
@@ -311,7 +324,15 @@ can also see what data is being loaded on a given page and what actions there ar
 - code splitting
 - minimizing bundle size
 
-<img src="/js-baseline.png" height="300" width="400">
+<!--
+code-splitting: code will be split between routes, depending on usage
+
+Svelte components have pretty minimal bundle size -- compared to other similar SPA frameworks, SK ships significantly less JS (though no-JS-by-default frameworks still win out)
+-->
+
+---
+
+<img src="/js-baseline.png" >
 
 [https://www.zachleat.com/web/site-generator-review/#client-javascript-baseline](https://www.zachleat.com/web/site-generator-review/#client-javascript-baseline)
 
@@ -319,13 +340,11 @@ can also see what data is being loaded on a given page and what actions there ar
   a {
     font-size: 1rem;
   }
+
+  img {
+    height: 450px;
+  }
 </style>
-
-<!--
-code-splitting: code will be split between routes, depending on usage
-
-Svelte components have pretty minimal bundle size -- compared to other similar SPA frameworks, SK ships significantly less JS (though no-JS-by-default frameworks still win out)
--->
 
 ---
 layout: fact
@@ -335,6 +354,12 @@ layout: fact
 
 <!--
 where I want to spend most time
+
+a lot of the time, the opportunities to make your app more efficient all involve data loading
+
+is your data loading fast enough? are you loading too much? are you starting to load data as soon as possible?
+
+in SvelteKit, data loading occurs in the load function
 -->
 
 ---
@@ -350,10 +375,10 @@ where I want to spend most time
 
 ```js {all|2-6}
 export async function load() {
-	const items = 
-      await api.getItems();
+	const detail = 
+      await api.getAlbumInfo();
 	return {
-		items
+		detail
 	};
 }
 ```
@@ -362,35 +387,30 @@ export async function load() {
 <div>
 +page.svelte
 
-```svelte {all|2|2,6-8}
+```svelte {all|2|2,5-6}
 <script>
   export let data;
 </script>
 
-<ul>
-{#each data.items as item}
-  <li>{item}</li>
-{/each}
-</ul>
+<h1>{data.detail.title}</h1>
+<p>{data.detail.description}
 ```
 </div>
 
 </div>
 
 <!--
-TODO sveltunes example 
+if you've used SK before, you've almost certainly seen the load function
 
-similarly, most apps need a way to load data
-
-in SK: the load function
-
-loads the data for the page
+and SK, the load function is the recommended way to load data for the page
 
 when you navigate to this route, SK will call the load function
 
 then use the result to render the new page and navigate without refreshing
 
 available in the data prop
+
+and SK didn't introduce the load function arbitrarily. it's more efficient that what most apps were doing before SK
 -->
 
 ---
@@ -416,54 +436,37 @@ available in the data prop
 compare this to how you'd do it in pure Svelte
 
 more boilerplate, but also less efficient
+
+that's because this starts fetching data a lot later
+
+while the load function can start fetching data on the server, this fetch call won't happen until after the JS for the page has loaded and this component has fully mounted
 -->
 
 ---
 
-# Comparing `onMount` and `load`
+# the `load` function is _discoverable_
 
-<div class="grid gap-6 grid-cols-2">
-<div>
-
-## `load`
+This means the framework can easily identify what data needs to load for a given page.
 
 <v-clicks>
 
-- more efficient to author
-- makes data loading discoverable by the framework
-  - type-safe data loading
-  - preloading on hover
-  - can SSR page data (return actual HTML)
-- only at the page level
+- starts sooner
+- SSR
+- type-safe data loading (also resilient)
+- preloading on hover for faster navigations
 
 </v-clicks>
 
-</div>
+<v-click>
 
-<div>
+Disadvantage: it's only at the page level
 
-## `onMount`
-
-<v-clicks>
-
-- more boilerplate
-- not discoverable by the framework
-- no type-safety / preloading / SSR
-- can fetch at component level (though less efficiently)
-
-</v-clicks>
-
-</div>
-</div>
+</v-click>
 
 <!--
-let's compare the two approaches and explain why load is more efficient
-
-onMount fetches after JS parse + render
+starts sooner - we don't need to render the page to figure out what data fetching occurs
 
 type-safety -- efficient DX (don't have to figure out what data is available or keep types in sync yourself) and also resilient (know at build time if you messed up the types)
-
-TODO: demo how this works in Sveltunes on album page?
 
 so that's why load is more efficient. but the load function also has a lot more features that help you deliver an efficient experience
 -->
@@ -472,8 +475,22 @@ so that's why load is more efficient. but the load function also has a lot more 
 
 # layout loads
 
+what do you do with data that is needed by multiple pages in your app?
+
+<v-click>
+
+```js
+// +layout.server.js
+export function load() {
+  return {
+    // whatever data
+  }
+}
+```
+
+</v-click>
+
 <!--
-TODO: explain layout?
 
 page load function => loads data needed by that page
 
@@ -483,64 +500,137 @@ example: login state
 - nav needs it to show login/favorites links
 - each album needs it to determine whether to show favorite button
 
-[ TODO: swap to favorite state? ]
+well, layouts can have load functions too!
 
-[ TODO: slides that show where these are being used ]
+in a SK app, you can have layout components that contain shared UI for your app. e.g. in sveltunes, the nav bar is in a layout
 
-you could return it from each page load, but that's duplicative
+just like you can create a +page.server.js, you can also create a +layout.server.js
 
-and what if this was data that had to be fetched? then not only would you have to return it from multiple load functions, but you would be refetching the same data when it didn't change
+and the data loaded by that layout is available across your app
 
-instead: move shared data to a layout. just like layouts reduce UI duplication, they can also reduce data loading duplication
+just like layouts reduce UI duplication, they can also reduce data loading duplication
 
-[ TODO: diagram. excalidraw? ]
+[ demonstrate in sveltunes -- isLoggedIn set in layout load, but accessible in both layout and page ]
 
-show example on Sveltunes
+and while in this case we're not fetching the login state from anywhere, if the shared data you want to retrieve does involve a network call, fetching it in the layout can be even more valuable
+
+you don't need to make duplicate calls, or try to introduce some sort of caching -- just fetch it in the layout and the pages can access it too
+
+we'll see an example of this later
+
 -->
 
 ---
 
-# loading data in parallel
+# loading data in parallel (app-level)
+
+e.g. navigating to /album/3
+
+```text {all|3,5}
+src/
+├─ routes/
+│  ├─ +layout.server.js
+│  ├─ album/[id]/
+│  │  ├─ +page.server.js
+│  │  ├─ +page.svelte
+```
 
 <!--
-[ this is cuttable. or could fold into bullet point on previous slide ]
+so now we have potentially multiple load functions for a route - the load for the layout and the load for the page
+
+and you can nest layouts in SK, so you could potentially have more
 
 important to understand that SvelteKit doesn't run these load function sequentially (layout load => page load)
 
 instead, they're run in parallel
 
-which is good: list of favorites and album info are separate, they don't need to wait for each other
+which is good: each load function is independent, they don't need to wait for each other
 
-[ TODO diagram ]
+the data your layout is loading isn't needed to fetch the data your album page is loading
 
-this is also a principle you should follow inside single load functions
+and the reason we're able to parallelize this is that SK can determine the load functions it needs to run without rendering the page
 
-on the artist page: artist info and list of releases are two separate api calls. instead of awaiting one and then the other, fire them both at the same time [this is before we add the streamed promise behavior]
-
-alternatively: return them directly and SvelteKit will await them in parallel for you
+[ TODO diagram to visualize sequential vs parallel ]
 -->
 
 ---
 
-# waiting for the parent data
+# loading data in parallel (page-level)
+
+```js
+export function load({ params }) {
+  // ❌ don't do this!
+  const isFavorited = await api.isAlbumFavorited(params.id);
+  const albumDetail = await api.getAlbumDetail(params.id);
+  return {
+    isFavorited,
+    albumDetail
+  }
+}
+```
 
 <!--
-[ this is cuttable is pressed for time. can briefly explain in final part if needed ]
+this is also a principle you should follow inside single load functions
 
-though sometimes you can't fully run in parallel and you have a page that needs data from a parent load function
+on the album page: favorite status and album info are two separate api calls. instead of awaiting one and then the other, fire them both at the same time
+-->
 
-you can use `await parent`
+---
 
-you want to be careful, because when you do this the rest of your load function will stop executing in parallel
+# loading data in parallel (page-level)
 
-if you're making other api calls, fire those off first (just like making api calls in parallel)
+```js
+export function load({ params }) {
+  // ✅ do this!
+  const isFavorited = api.isAlbumFavorited(params.id);
+  const albumDetail = api.getAlbumDetail(params.id);
+  return {
+    isFavorited,
+    albumDetail
+  }
+}
+```
 
-one example where this can be useful: favorites. all data loading is in layout, pages just extract data from that
+<!--
+SK will automatically await top level promises
 -->
 
 ---
 
 # loading the page before all the data is ready
+
+<div class="grid grid-cols-2 gap-6">
+
+<div v-click>
+
+```js
+export function load() {
+  const slowApiCall = 
+      getSlowData();
+  return {
+    slow: {
+      slowApiCall
+    }
+  }
+}
+```
+
+</div>
+<div v-click>
+
+```svelte
+{#await data.slow.slowApiCall}
+<p>Loading...</p>
+{:then result}
+<p>Result: {result}</p>
+{:catch e}
+<p>Something went wrong</p>
+{/await}
+```
+
+</div>
+
+</div>
 
 <!--
 by default, SvelteKit won't navigate to a page until all the data has finished loading
@@ -549,22 +639,47 @@ but sometimes, your data can be slow
 
 example: artists page. the call to get the list of albums is very slow. and this can really make your navigation feel sluggish
 
-and it's not just navigations after the page loads - SK needs all the data for the page to server-side render it. which means if this is the first page your user visits, they might wait a while to see anything [ demonstrate by refreshing ]
+and it's not just client-side navigations - SK needs all the data for the page to server-side render it. which means if this is the first page your user visits, they might wait a while to see anything [ demonstrate by refreshing ]
 
 normally your data sources should be fast enough that this won't be a problem. but in case you have slow data, SK has a way to render the page without waiting for it to load: streamed promises
 
 remember how if we return promises, SK will automatically await them in parallel? well, that's only true at the top level. if the promise is nested, SK will not wait for it to resolve and return an actual Promise to the page
 
-[ might need to adjust if previous section is cut ]
-
 and that means we can show a loading state instead of blocking navigation
 
 let's see an example [ show artist page example ]
+
+really powerful if you have slow data
+
+reliant on JS though, so only use for non-essential data
 -->
 
 ---
 
-# universal load functions
+# universal load functions (+page.js)
+
+<v-clicks>
+
+- can call external APIs directly
+- can return non-serializable data
+
+</v-clicks>
+
+<v-click>
+
+```js
+import Component from './Comp.svelte';
+import { writable } from 'svelte/store';
+export function load({ data }) {
+  return {
+    component: Component,
+    fn: () => "I can't be serialized",
+    store: writable(data.whatever)
+  }
+}
+```
+
+</v-click>
 
 <!--
 All the load functions we've seen up to this point have been in .server.js files. This means they only run on the server, serialize the result, and return to the client
@@ -575,7 +690,7 @@ You can also have what's called "universal" load functions in +page.js. these ar
 2. but then they run on the client
 
 and this has some advantages
-- if you're calling external APIs, you can call them directly from the browser instead of first making a call to your server (efficient!)
+- if you're calling external public APIs, you can call them directly from the browser instead of first making a call to your server (efficient!)
 - they can return data that isn't serializable
 
 we've seen that server load functions can return more than JSON - we were able to return Promises, and you're also able to return things like Maps and Sets. but there's a limit
@@ -584,35 +699,32 @@ if you want to return data that includes things like components or functions, yo
 
 and you can actually have both server and universal loads if you want to. the universal load gets the return value from the server load in data, and can either forward it along or use it to return different data
 
-[ TODO: toy example returning component? how does this differ from doing it inside +page]
+here's an example of a universal load function returning things you can't return from a server load function
 
-this was a bit abstract now, but this will come into play in the big finale
+this was a bit abstract now, but returning a store from a load function will be important later
 -->
 
 ---
 
-# invalidation: when do you re-run load functions?
+# Efficiency recap
+
+<v-clicks>
+
+- use the load function to start the request as soon as possible
+  - preloading
+- use layout loads for shared data
+- load data in parallel
+- stream slow data
+- call APIs directly from client when possible
+
+</v-clicks>
 
 <!--
-sometimes you need to re-run load functions. SK will try to do that intelligently
 
-you want to strike the right balance: run too often and it's wasteful, don't run enough and data becomes out of date
+Recap of where we've been
 
-SK will track what data is used in each load function and only re-run it when the data changes
+later we'll talk about how efficiency intersects with forms, but first...
 
-let's look at an example: navigating between artists
-
-when you first load the page, two load functions are run. the layout load and the page load
-
-but then subsequent navigations will only run the page load. this is because that load uses the url (and params), so it will re-run it whenever the URL changes
-
-however, the layout load does not depend on anything that is changing, so it only runs once
-
-that's why it's efficient to get shared data in the layout, because it won't re-run on every page
-
-however, sometimes you need to reload all the data. when you submit a form, that form submission could have changed anything on your backend. So SK will rerun all the load functions on the page by default
-
-this isn't very efficient right? but it's a good default to keep data from getting stale. later we'll come back to ways to more intelligently rerun certain load functions
 -->
 
 ---
@@ -623,6 +735,30 @@ layout: fact
 
 <!--
 ties back to what fails the most on the web? JavaScript
+-->
+
+---
+
+# when JS is not available
+
+<v-clicks>
+
+- the user disabled JS
+- the page isn't finished loading
+- the HTTP request failed
+- the corporate firewall blocked it
+- data saver mode
+- browser extension interference
+- in-app Facebook browser
+- the CDN is down
+- and more
+
+</v-clicks>
+
+<!--
+Everyone has JS, right? No
+
+it's not just the user disabled JS. it's common for people to be in situations where JS is slow to load or even fails to load
 -->
 
 ---
@@ -646,27 +782,33 @@ https://www.kryogenix.org/code/browser/everyonehasjs.html
 </style>
 
 <!--
-Everyone has JS, right? No
-
-very few people disable JS. but it's common for people to be in situations where JS is slow to load or even fails to load
-
 If all your logic is in JS, if your JS fails to load, then you're out of luck
 
-But if your app is SvelteKit (or another framework that prioritizes PE), the defaults will ensure some functionality (SSR, links to navigate, forms submit data)
+But if you build your app in a way that progressively enhances, where it's still functional as HTML, then parts of your app will still function
 -->
 
 ---
 
-# Good defaults
+# Good defaults & conventions
 
 - SSR (returning real HTML)
+  - using the load function
 - links to navigate
 - forms to submit data
 
+(defaults, not demands)
+
 <!--
+SK encourages that through defaults and conventions
+
+everything we talked about how using the load function makes your app more efficient -- it also makes it more resilient, because data returned by the load function is able to be used for SSR
+
 these are defaults, not demands - you can opt-out if you want to
 
 but by using them, you make your app more resilient, because the browser knows how to work with these without loading all of your app's JS
+
+the user can see your content and interact with it even when your JS is slow to load or fails entirely
+
 -->
 
 ---
@@ -676,9 +818,11 @@ layout: fact
 # _enhanced_ links and forms
 
 <!--
-when JS is available, links will use client side routing instead of a full page reload
+and more importantly, these aren't just regular links and forms - they're enhanced
 
-and with one attribute, forms will also submit client side. so you can update the page in place instead of losing all that page state
+when JS is available, links will use client side routing instead of a full page reload and can preload the data for a navigation before the user actually clicks on the link
+
+and with one attribute, forms will also be enhanced
 -->
 
 ---
@@ -700,9 +844,154 @@ and with one attribute, forms will also submit client side. so you can update th
 </form>
 ```
 
+<!--
+normally, submitting a form completely reloads the page.
+
+but if you add use:enhance, SvelteKit will emulate the browser-native behavior without the reload
+
+which means you're free to enhance the experience with JS, for example adding animated transitions or optimistic UI
+
+so you can write data updates in your app in a way that will work when JS is not available, but enhance that experience when it is available
+
+the actual request handling happens inside page.server.js where you can read the submitted form data and respond to it. I'm going to focus on the client side enhancement for now. if you want to know more, look up "form actions" in the SK docs
+-->
+
 ---
 
-# use:enhance
+# Customizing `use:enhance`
+
+```svelte
+<form 
+    method="POST" 
+    action="/?login"
+    use:enhance{() => {
+      // do something before the submission happens
+      return () => {
+        // do something after the submission happens
+      }
+    }}></form>
+```
+
+
+<!--
+you can get an enhanced form with just one attribute. but if you want more control over what happens with the form submission, you can pass a callback
+-->
+
+---
+
+# Example: optimistic favorite UI
+
+<v-click>
+
+```svelte {all} {maxHeight:'470px'}
+<script>
+  export let data;
+  let submission;
+
+  // when submitting, assume the submission has succeeded 
+  // and the value is flipped
+  $: isFavorite = submission ? 
+      !data.isFavorite : 
+      data.isFavorite;
+</script>
+
+<form
+	action={isFavorite ? '?/unfavorite' : '?/favorite'}
+	method="POST"
+	use:enhance={(event) => {
+		submission = event.formData;
+		return async ({ update, result }) => {
+			await update();
+			submission = undefined;
+		};
+	}}
+>
+  <FavoriteButton {isFavorite} />
+</form>
+```
+
+</v-click>
+
+<!--
+here's one way to customize enhance to get optimistic UI
+
+normally: you click on a button, don't get feedback until the request completes
+
+what if we assume it succeeds? change the state before the request happens
+
+demo the experience first on sveltunes
+
+TODO highlight
+-->
+
+---
+
+# resilient _and_ efficient
+
+- using forms, so our app is resilient
+- but all the data is reloaded after submission, which is not efficient
+
+TODO image
+
+<!--
+so we made our app more resilient using forms, but we've also made it less efficient
+
+when you submit a form, that form submission could have changed anything on your backend. So SK will rerun all the load functions on the page by default
+
+it's a good default to keep data from getting stale, but it's also inefficient - we could fetch data we don't actually need
+
+take the favorite button example - when you add/remove a favorite, SK refetches all the data for the page by default - including the album details, which haven't changed
+
+and this isn't efficient - we're wasting effort to load data that hasn't changed. a couple things to note:
+
+1. this happens because it's a safe default. SK doesn't know that submitting the form only changes favorite state. all it knows is that something could have changed, so best reload everything
+2. this isn't unique to SK - the same thing would happen with a regular form submission - you're reloading the page, so you have to reload the data (or implement some sort of caching)
+
+but because we're not completely reloading the page, we're able to customize our app to only update the data we know have changed
+-->
+
+---
+
+```diff
+<form
+	action={isFavorite ? '?/unfavorite' : '?/favorite'}
+	method="POST"
+	use:enhance={(event) => {
+		submission = event.formData;
+		return async ({ update, result }) => {
+-			await update();
++			data.isFavorite = !data.isFavorite;
+			submission = undefined;
+		};
+	}}
+>
+```
+
+<!--
+so the solution for this page is on the simpler side - instead of calling update, which performs SK's default data refresh behavior, we just update the data ourselves
+
+and there is some nuance here, but the example I want to focus on is actually the favorites page because that setup is more interesting. let's do some live coding 🫣
+
+- demonstrate problem - you can't update the state of the layout
+- use store instead
+- then you can update the store
+- handle redirect
+- invalidate app:favorites
+
+so that's really bringing it all together - we're using a form so we make for a more resilient app, but also customizing that to load the minimum data necessary when the data changes
+-->
+
+---
+layout: fact
+---
+
+# time for a bit of live coding 🫣
+
+---
+layout: fact
+---
+
+# how SvelteKit helps build _efficient_ and _resilient_ apps
 
 ---
 layout: two-cols
@@ -710,11 +999,11 @@ layout: two-cols
 
 # efficiency
 
-- only fetch what you need
+- fetch before rendering 
+- don't overfetch (use layout loads for shared data)
 - fetch in parallel
 - prefetch when you can
 - avoid re-fetching
-- fetch at build time
 - minimal boilerplate (efficiency while authoring)
 - ship less JS
 
@@ -724,8 +1013,15 @@ layout: two-cols
 
 - JS is an enhancement
 - building on the web platform (links & forms)
+  - but enhanced!
 - typesafety
 - prerendering
+
+<style>
+  ul {
+    padding-right: 0.5rem;
+  }
+</style>
 
 <!--
 recap

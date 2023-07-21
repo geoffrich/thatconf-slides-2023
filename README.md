@@ -15,3 +15,4 @@ TODO
 - add slide introing demo app somewhere
 - add THAT slides
 - simplify examples in preparation for changes (separate branch)
+- more pictures
