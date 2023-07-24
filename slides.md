@@ -21,10 +21,14 @@ title: Building efficient and resilient web apps with SvelteKit
 
 # What this talk is
 
+<v-clicks>
+
 - building **efficient** and **resilient** web apps
 - a bit of a grab bag
 - moving beyond the basics of SvelteKit (w/ a quick recap)
 - practical examples - "Sveltunes"
+
+</v-clicks>
 
 <!--
 
@@ -86,11 +90,12 @@ layout: center
 
 </style>
 
-
 <!--
 Svelte/Svelte
 
 but if you're here and are completely new to Svelte or SvelteKit, quick recap
+
+TODO move show of hands
 -->
 
 ---
@@ -266,7 +271,11 @@ layout: fact
 # efficiency: minimizing waste
 
 <!--
-we're going to mainly focus on data loading but I think other aspects of developing with SK are efficient too
+to me, efficiency means minimizing waste
+
+and that means building web apps that respect our users time, that retrieve data quickly and don't ask for more data unnecessarily
+
+but while I'll mostly focus on building an efficient data loading experience, developing with SK is also an efficient experience, since it prevents you the developer from wasting time
 -->
 
 ---
@@ -296,20 +305,11 @@ folders create routes
 src/
 ├─ routes/
 │  ├─ +page.svelte
-│  ├─ about/
+│  ├─ search/
 │  │  ├─ +page.svelte
 ```
 
-<br>
-
-```html
-<a href="/">Home</a>
-<a href="/about">About</a>
-```
-
 <!--
-TODO this example should use Sveltunes
-
 Folders create routes
 
 efficient: To know what renders at any given URL, you go to the corresponding folder
@@ -325,9 +325,11 @@ can also see what data is being loaded on a given page and what actions there ar
 - minimizing bundle size
 
 <!--
+but back to the user experience, SK takes steps to ship efficient JS payloads
+
 code-splitting: code will be split between routes, depending on usage
 
-Svelte components have pretty minimal bundle size -- compared to other similar SPA frameworks, SK ships significantly less JS (though no-JS-by-default frameworks still win out)
+Svelte components have pretty minimal bundle size
 -->
 
 ---
@@ -346,6 +348,10 @@ Svelte components have pretty minimal bundle size -- compared to other similar S
   }
 </style>
 
+<!--
+compared to other similar meta frameworks, SK ships significantly less JS (though no-JS-by-default frameworks still win out)
+-->
+
 ---
 layout: fact
 ---
@@ -360,6 +366,8 @@ a lot of the time, the opportunities to make your app more efficient all involve
 is your data loading fast enough? are you loading too much? are you starting to load data as soon as possible?
 
 in SvelteKit, data loading occurs in the load function
+
+TODO smoother
 -->
 
 ---
@@ -370,10 +378,10 @@ in SvelteKit, data loading occurs in the load function
 
 <div class="grid grid-cols-2 gap-6">
 
-<div>
+<div v-click="1">
 +page.server.js
 
-```js {all|2-6}
+```js {all|all|2-6}
 export async function load() {
 	const detail = 
       await api.getAlbumInfo();
@@ -384,7 +392,7 @@ export async function load() {
 ```
 </div>
 
-<div>
+<div v-click="3">
 +page.svelte
 
 ```svelte {all|2|2,5-6}
@@ -402,11 +410,15 @@ export async function load() {
 <!--
 if you've used SK before, you've almost certainly seen the load function
 
-and SK, the load function is the recommended way to load data for the page
+the load function is the recommended way to load data for the page in SK
 
-when you navigate to this route, SK will call the load function
+how it works is you export a load function in +page.server.js file
 
-then use the result to render the new page and navigate without refreshing
+when you navigate to this route, SK will call the load function and use the data it returns
+
+let's say you have a page showing information about a specific music album - load function might look like this
+
+then use the result to render the new page 
 
 available in the data prop
 
@@ -423,11 +435,7 @@ and SK didn't introduce the load function arbitrarily. it's more efficient that 
 
   let data;
   onMount(() => {
-    fetch('/api/items')
-      .then(r => r.json())
-      .then(result => {
-        data = result;
-      });
+    data = await api.getAlbumInfo();
   });
 </script>
 ```
@@ -435,11 +443,15 @@ and SK didn't introduce the load function arbitrarily. it's more efficient that 
 <!--
 compare this to how you'd do it in pure Svelte
 
-more boilerplate, but also less efficient
+similar amount of code, but this will usually be less efficient
 
-that's because this starts fetching data a lot later
+that's the load function is able to start fetching data a lot sooner
 
 while the load function can start fetching data on the server, this fetch call won't happen until after the JS for the page has loaded and this component has fully mounted
+
+and that's because the load function's biggest advantage is that it's discoverable
+
+TODO highlight
 -->
 
 ---
@@ -452,7 +464,6 @@ This means the framework can easily identify what data needs to load for a given
 
 - starts sooner
 - SSR
-- type-safe data loading (also resilient)
 - preloading on hover for faster navigations
 
 </v-clicks>
@@ -464,9 +475,9 @@ Disadvantage: it's only at the page level
 </v-click>
 
 <!--
-starts sooner - we don't need to render the page to figure out what data fetching occurs
+[ explain benefits ]
 
-type-safety -- efficient DX (don't have to figure out what data is available or keep types in sync yourself) and also resilient (know at build time if you messed up the types)
+disadvantage: can't be component level
 
 so that's why load is more efficient. but the load function also has a lot more features that help you deliver an efficient experience
 -->
@@ -504,7 +515,7 @@ well, layouts can have load functions too!
 
 in a SK app, you can have layout components that contain shared UI for your app. e.g. in sveltunes, the nav bar is in a layout
 
-just like you can create a +page.server.js, you can also create a +layout.server.js
+just like you can create a +page.server.js with a load function, you can also create a +layout.server.js
 
 and the data loaded by that layout is available across your app
 
@@ -546,7 +557,7 @@ instead, they're run in parallel
 
 which is good: each load function is independent, they don't need to wait for each other
 
-the data your layout is loading isn't needed to fetch the data your album page is loading
+the data your layout is loading isn't needed to fetch the data your album page is loading, so why wait?
 
 and the reason we're able to parallelize this is that SK can determine the load functions it needs to run without rendering the page
 
@@ -597,7 +608,7 @@ SK will automatically await top level promises
 
 ---
 
-# loading the page before all the data is ready
+# dealing with slow data
 
 <div class="grid grid-cols-2 gap-6">
 
@@ -684,10 +695,12 @@ export function load({ data }) {
 <!--
 All the load functions we've seen up to this point have been in .server.js files. This means they only run on the server, serialize the result, and return to the client
 
-You can also have what's called "universal" load functions in +page.js. these are able to run on the server and the client
+this is great since you can use sensitive env variables and access your databases and private APIs without exposing that to the client
 
-1. they run on the server when retrieving data for the first server-side render
-2. but then they run on the client
+You can also have what's called "universal" load functions in +page.js
+
+1. these run on the server when retrieving data for the first server-side render
+2. but then they only run on the client
 
 and this has some advantages
 - if you're calling external public APIs, you can call them directly from the browser instead of first making a call to your server (efficient!)
@@ -734,7 +747,7 @@ layout: fact
 # Resiliency
 
 <!--
-ties back to what fails the most on the web? JavaScript
+my focus with resiliency is going to mostly be around: what happens when JS is not available?
 -->
 
 ---
@@ -759,6 +772,8 @@ ties back to what fails the most on the web? JavaScript
 Everyone has JS, right? No
 
 it's not just the user disabled JS. it's common for people to be in situations where JS is slow to load or even fails to load
+
+the web can be a hostile environment
 -->
 
 ---
@@ -864,7 +879,7 @@ the actual request handling happens inside page.server.js where you can read the
 <form 
     method="POST" 
     action="/?login"
-    use:enhance{() => {
+    use:enhance={() => {
       // do something before the submission happens
       return () => {
         // do something after the submission happens
@@ -883,7 +898,7 @@ you can get an enhanced form with just one attribute. but if you want more contr
 
 <v-click>
 
-```svelte {all} {maxHeight:'470px'}
+```svelte {all|15-21|5-9} {maxHeight:'470px'}
 <script>
   export let data;
   let submission;
@@ -920,8 +935,6 @@ normally: you click on a button, don't get feedback until the request completes
 what if we assume it succeeds? change the state before the request happens
 
 demo the experience first on sveltunes
-
-TODO highlight
 -->
 
 ---
@@ -991,7 +1004,13 @@ layout: fact
 layout: fact
 ---
 
-# how SvelteKit helps build _efficient_ and _resilient_ apps
+# how does SvelteKit help build _efficient_ and _resilient_ apps
+
+<style>
+  h1 {
+    line-height: 1.2 !important;
+  }
+</style>
 
 ---
 layout: two-cols
@@ -1004,7 +1023,6 @@ layout: two-cols
 - fetch in parallel
 - prefetch when you can
 - avoid re-fetching
-- minimal boilerplate (efficiency while authoring)
 - ship less JS
 
 ::right::
@@ -1015,7 +1033,6 @@ layout: two-cols
 - building on the web platform (links & forms)
   - but enhanced!
 - typesafety
-- prerendering
 
 <style>
   ul {
@@ -1048,3 +1065,27 @@ layout: fact
 ---
 
 # Thanks!
+
+---
+layout: image
+image: "/that/Save_the_Date.png"
+---
+
+---
+layout: image
+image: "/that/Sponsors.png"
+---
+
+---
+layout: image
+image: "/that/Session_Survey_Speaker.png"
+---
+
+<img src="/that/QR.png" class="qr">
+
+<style>
+  .qr {
+    max-width: 300px;
+    margin: 3rem auto 0 auto;
+  }
+</style>

@@ -15,4 +15,7 @@ TODO
 - add slide introing demo app somewhere
 - add THAT slides
 - simplify examples in preparation for changes (separate branch)
+    - remove optimistic UI for favorite button
+    - remove stores on /favorites
+    - remove promise streaming?
 - more pictures
