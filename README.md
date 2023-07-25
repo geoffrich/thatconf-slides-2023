@@ -12,10 +12,9 @@ Learn more about Slidev on [documentations](https://sli.dev/).
 
 TODO
 
-- add slide introing demo app somewhere
-- add THAT slides
 - simplify examples in preparation for changes (separate branch)
-    - remove optimistic UI for favorite button
-    - remove stores on /favorites
     - remove promise streaming?
 - more pictures
+- publish slides
+- decide on how/if to do coding portions. if tricky, maybe only at end?
+    - depending on result, move optimistic UI example

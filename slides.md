@@ -14,27 +14,19 @@ title: Building efficient and resilient web apps with SvelteKit
 
 # Building _efficient_ and _resilient_ web apps with SvelteKit
 
+Geoff Rich
+
 <img class="mt-20" src="/svelte-machine.png" />
 
-
----
-
-# What this talk is
-
-<v-clicks>
-
-- building **efficient** and **resilient** web apps
-- a bit of a grab bag
-- moving beyond the basics of SvelteKit (w/ a quick recap)
-- practical examples - "Sveltunes"
-
-</v-clicks>
-
 <!--
+this talk is a bit of a grab bag, but focused on two characteristics of well-built web apps
 
-[ TODO have better talk hook/intro ]
+1. they're efficient and aren't wasteful in the amount of data they load and the time it takes to load that data
+2. they're resilient, especially if your app's JS is slow to load or fails entirely 
 
-"Building web apps with all the modern best practices can be complicated. Not only do you want your app to be *efficient* and load data quickly and intelligently, you also want it to be *resilient* and stay upright regardless of your users’ device or network. "
+and we're going to focus on how to build apps with SvelteKit that meet these criteria
+
+I also want to go somewhat beyond the basics of SvelteKit -- this talk was originally titled "Intermediate SvelteKit." I will be recapping those basics for any of you who are less familiar with Svelte or SvelteKit, but I want to go beyond SvelteKit's "hello world" and focus on more intermediate features.
 -->
 
 ---
@@ -43,8 +35,7 @@ title: Building efficient and resilient web apps with SvelteKit
 
 - Svelte maintainer
 - Senior Software Engineer at Ordergroove
-- pianist
-- cat lover
+- pianist & cat lover
 
 <br>
 
@@ -91,11 +82,9 @@ layout: center
 </style>
 
 <!--
-Svelte/Svelte
+[ show of hands — who has written a Svelte component? what about SvelteKit? ]
 
-but if you're here and are completely new to Svelte or SvelteKit, quick recap
-
-TODO move show of hands
+if you're here and are completely new to Svelte or SvelteKit, quick recap
 -->
 
 ---
@@ -114,7 +103,7 @@ a _component-based JS framework_ that uses a <span class="svelte">compiler</span
     text-align: center;
     display: block;
     margin-top: 7rem !important;
-    font-size: 3rem;
+    font-size: 3rem !important;
     line-height: 1.5 !important;
     opacity: 1 !important;
   }
@@ -128,8 +117,7 @@ a _component-based JS framework_ that uses a <span class="svelte">compiler</span
 </style>
 
 <!--
-- [ show of hands — who has heard of Svelte? used Svelte? ]
-- So Svelte has been getting fairly well known these days, but in case this is your first time hearing about it — it is a component-based JavaScript framework like React and Vue, but the major difference is instead of interpreting your component code with a runtime it ships to the browser, it compiles your components into vanilla JavaScript at build time. So the advantage of this is that you can ship less JavaScript to your users, and your application has to do less work because it has compiled away a lot at build time
+So Svelte has been getting fairly well known these days, but in case this is your first time hearing about it — it is a component-based JavaScript framework like React and Vue, but the major difference is instead of interpreting your component code with a runtime it ships to the browser, it compiles your components into vanilla JavaScript at build time. So the advantage of this is that you can ship less JavaScript to your users, and your application has to do less work because it has compiled away a lot at build time
 -->
 
 ---
@@ -157,8 +145,6 @@ a _component-based JS framework_ that uses a <span class="svelte">compiler</span
 ```
 
 <!--
-[ don't dwell too long on this ]
-
 But for me, the reason I love svelte is not because it's the smallest or the fastest framework -- it does well there, but it's not #1
 
 It's how productive it feels to write Svelte components.
@@ -175,7 +161,7 @@ This is what a Svelte component looks like
 
 That's Svelte, if it's new to you I recommend giving it a try
 
-Svelte is my favorite way to write UI components, but when building a web app you often need more than just a way to write components. 
+Svelte is my favorite way to write UI components, but when building a web app you often need more than just a way to write components.
 -->
 
 ---
@@ -188,15 +174,13 @@ Svelte is my favorite way to write UI components, but when building a web app yo
 - data loading
 - build optimization
 - form handling
-- SSR
+- server-side rendering (SSR)
 - deployment
 - and more!
 
 </v-clicks>
 
 <!--
-TODO maybe drop/fold into next slide
-
 There are all these things that go into building a full web app that a component framework doesn't handle
 
 while you can answer all these yourself or find packages on npm, it would be nice to have a framework that already answers these questions so you don't have to
@@ -245,9 +229,28 @@ class: bg-white
   }
 </style>
 
+<!--
+If you’re familiar with the React ecosystem, think of it like NextJS or Remix
+-->
+
+---
+layout: fact
+---
+
+# introducing Sveltunes
 
 <!--
-If you’re familiar with the React ecosystem, think of it like NextJS or Remix, except unlike those frameworks Svelte and SvelteKit are made by the same team.
+Before we get too far, let's see what a SvelteKit app looks like
+
+I want to keep this practical, so a lot of the concepts we talk about today will be filtered through this music library demo app I built, Sveltunes
+
+to highlight:
+- you can do a few things: search for artists and albums, view details, and "favorite" albums to save then to your library
+- by default, the page is server rendered, so the browser can start showing content right away
+- but after the initial request, client-side routing takes over, so you get snappy, instant navigation
+- part of that fast navigation is due to preloading, where SK will start fetching the data for the next page as the user hovers over a link, so when they do click the link that navigation will happen instantly
+- and then the data updates in this app all use enhanced forms, so they'll still work when JS fails but provide an enhanced UX when JS is available
+- we sometimes call apps built like this "transitional apps", because they're not a multi-page app that's only server-rendered, or a single-page app that only works with JS. it's a hybrid approach that brings the best of both worlds
 -->
 
 ---
@@ -258,8 +261,6 @@ layout: fact
 
 <!--
 today I want to talk about building apps with SK, and specifically building apps that are efficient and resilient
-
-going to demonstrate using a demo app I built, Sveltunes
 
 let's start with efficiency
 -->
@@ -313,8 +314,6 @@ src/
 Folders create routes
 
 efficient: To know what renders at any given URL, you go to the corresponding folder
-
-can also see what data is being loaded on a given page and what actions there are by looking in +page.server.js
 -->
 
 ---
@@ -329,28 +328,9 @@ but back to the user experience, SK takes steps to ship efficient JS payloads
 
 code-splitting: code will be split between routes, depending on usage
 
-Svelte components have pretty minimal bundle size
+Svelte components have pretty minimal bundle size, so your average SvelteKit app is going to be much smaller than your average Next or Remix app
 -->
 
----
-
-<img src="/js-baseline.png" >
-
-[https://www.zachleat.com/web/site-generator-review/#client-javascript-baseline](https://www.zachleat.com/web/site-generator-review/#client-javascript-baseline)
-
-<style>
-  a {
-    font-size: 1rem;
-  }
-
-  img {
-    height: 450px;
-  }
-</style>
-
-<!--
-compared to other similar meta frameworks, SK ships significantly less JS (though no-JS-by-default frameworks still win out)
--->
 
 ---
 layout: fact
@@ -361,13 +341,13 @@ layout: fact
 <!--
 where I want to spend most time
 
-a lot of the time, the opportunities to make your app more efficient all involve data loading
+because most of your apps loading or transition time is spent doing data loading
 
-is your data loading fast enough? are you loading too much? are you starting to load data as soon as possible?
+if the content is static, it's quick. it's only when you need to call an API or query a DB that things can slow down.
+
+so if we can improve how your app loads data, then we can improve the efficiency of your app overall
 
 in SvelteKit, data loading occurs in the load function
-
-TODO smoother
 -->
 
 ---
@@ -422,7 +402,7 @@ then use the result to render the new page
 
 available in the data prop
 
-and SK didn't introduce the load function arbitrarily. it's more efficient that what most apps were doing before SK
+and SK didn't introduce the load function arbitrarily. it's more efficient that what most Svelte apps were doing before SK
 -->
 
 ---
@@ -450,8 +430,6 @@ that's the load function is able to start fetching data a lot sooner
 while the load function can start fetching data on the server, this fetch call won't happen until after the JS for the page has loaded and this component has fully mounted
 
 and that's because the load function's biggest advantage is that it's discoverable
-
-TODO highlight
 -->
 
 ---
@@ -475,9 +453,15 @@ Disadvantage: it's only at the page level
 </v-click>
 
 <!--
+a load function is just an export from a file in the routes tree, so SK can easily identify what load functions need to run for a given navigation
+
+whereas for onMount, you need to render the whole component first, so SK can't start loading the data until much later
+
 [ explain benefits ]
 
-disadvantage: can't be component level
+disadvantage: can't be component level. load function have to be associated with routes. sometimes you might want to encapsulate data loading inside a component, and then you'll have to reach for onMount and the associated tradeoffs
+
+but load handles the majority of cases well, and that's what we'll be focusing on today
 
 so that's why load is more efficient. but the load function also has a lot more features that help you deliver an efficient experience
 -->
@@ -488,18 +472,7 @@ so that's why load is more efficient. but the load function also has a lot more 
 
 what do you do with data that is needed by multiple pages in your app?
 
-<v-click>
-
-```js
-// +layout.server.js
-export function load() {
-  return {
-    // whatever data
-  }
-}
-```
-
-</v-click>
+<img src="/layout-load.png">
 
 <!--
 
@@ -515,11 +488,12 @@ well, layouts can have load functions too!
 
 in a SK app, you can have layout components that contain shared UI for your app. e.g. in sveltunes, the nav bar is in a layout
 
+so just like layouts reduce UI duplication, they can also reduce data loading duplication
+
 just like you can create a +page.server.js with a load function, you can also create a +layout.server.js
 
 and the data loaded by that layout is available across your app
 
-just like layouts reduce UI duplication, they can also reduce data loading duplication
 
 [ demonstrate in sveltunes -- isLoggedIn set in layout load, but accessible in both layout and page ]
 
@@ -535,16 +509,92 @@ we'll see an example of this later
 
 # loading data in parallel (app-level)
 
-e.g. navigating to /album/3
+<v-click>
 
 ```text {all|3,5}
 src/
 ├─ routes/
-│  ├─ +layout.server.js
+│  ├─ +layout.server.js 🔴
 │  ├─ album/[id]/
-│  │  ├─ +page.server.js
+│  │  ├─ +page.server.js 🔵
 │  │  ├─ +page.svelte
 ```
+
+</v-click>
+<v-click>
+
+## sequential
+
+<div class="sequence mb-3 mt-1">
+  <div class="bar bar-1">4s</div>
+  <div class="bar bar-2">5s</div>
+  <div class="result">= 9s total</div>
+</div>
+
+</v-click>
+<v-click>
+
+## parallel
+
+<div class="parallel mt-1">
+  <div class="bar bar-3">4s</div>
+  <div class="bar bar-4">5s</div>
+  <div class="result">= 5s total</div>
+</div>
+
+</v-click>
+
+<style>
+  .sequence {
+    display: grid;
+    grid-template-columns: repeat(15, 20px);
+    grid-template-rows: 18px;
+    gap: 5px;
+  }
+
+  .parallel {
+    display: grid;
+    grid-template-columns: repeat(15, 20px);
+    grid-template-rows: 18px 18px;
+    gap: 5px;
+  }
+
+  .bar-1, .bar-3 {
+    background: red;
+  }
+
+  .bar-2, .bar-4 {
+    background: blue;
+  }
+
+  .bar {
+    line-height: 1;
+    color: white;
+    padding-left: 0.25rem;
+  }
+
+  .result {
+    font-size: 1.5rem;
+    grid-column: 10 / span 5;
+  }
+
+  .bar-1 {
+    grid-column: 1 / span 4;
+  }
+
+  .bar-2 {
+    grid-column: 5 / span 5;
+  }
+
+  .bar-3 {
+    grid-column: 1 / span 4;
+  }
+
+  .bar-4 {
+    grid-column: 1 / span 5;
+    grid-row: 2;
+  }
+</style>
 
 <!--
 so now we have potentially multiple load functions for a route - the load for the layout and the load for the page
@@ -558,17 +608,13 @@ instead, they're run in parallel
 which is good: each load function is independent, they don't need to wait for each other
 
 the data your layout is loading isn't needed to fetch the data your album page is loading, so why wait?
-
-and the reason we're able to parallelize this is that SK can determine the load functions it needs to run without rendering the page
-
-[ TODO diagram to visualize sequential vs parallel ]
 -->
 
 ---
 
 # loading data in parallel (page-level)
 
-```js
+```js {all|2-4}
 export function load({ params }) {
   // ❌ don't do this!
   const isFavorited = await api.isAlbumFavorited(params.id);
@@ -590,7 +636,7 @@ on the album page: favorite status and album info are two separate api calls. in
 
 # loading data in parallel (page-level)
 
-```js
+```js {all|2-4|5-8}
 export function load({ params }) {
   // ✅ do this!
   const isFavorited = api.isAlbumFavorited(params.id);
@@ -663,6 +709,8 @@ let's see an example [ show artist page example ]
 really powerful if you have slow data
 
 reliant on JS though, so only use for non-essential data
+
+lets you be more efficient - show the data you already have, stream in the rest
 -->
 
 ---
@@ -747,7 +795,19 @@ layout: fact
 # Resiliency
 
 <!--
-my focus with resiliency is going to mostly be around: what happens when JS is not available?
+the ability to withstand difficult conditions
+
+Resiliency can take many forms
+-->
+
+---
+layout: fact
+---
+
+# what happens when JavaScript is not available?
+
+<!--
+notice I didn't say disabled - that can be why JS is not available, but it's not the only reason
 -->
 
 ---
@@ -757,66 +817,63 @@ my focus with resiliency is going to mostly be around: what happens when JS is n
 <v-clicks>
 
 - the user disabled JS
-- the page isn't finished loading
+- the page isn't finished loading (airport wifi?)
 - the HTTP request failed
 - the corporate firewall blocked it
 - data saver mode
 - browser extension interference
-- in-app Facebook browser
-- the CDN is down
 - and more
 
 </v-clicks>
+
+<v-click>
+
+https://www.kryogenix.org/code/browser/everyonehasjs.html
+
+</v-click>
 
 <!--
 Everyone has JS, right? No
 
 it's not just the user disabled JS. it's common for people to be in situations where JS is slow to load or even fails to load
 
-the web can be a hostile environment
--->
+the web can be a hostile environment - Some studies show that JS fails on 3% of page loads, which is a lot
 
----
-layout: image
-image: /everyone-has-js.png
----
-
-https://www.kryogenix.org/code/browser/everyonehasjs.html
-
-<style>
-  .slidev-layout {
-    /* https://github.com/slidevjs/slidev/issues/798 */
-    background-size: contain !important;
-  }
-
-  a {
-    position: absolute;
-    bottom: 0.5rem;
-    @apply bg-black;
-  }
-</style>
-
-<!--
-If all your logic is in JS, if your JS fails to load, then you're out of luck
+If all your logic is in JS, if your JS fails to load, then you're out of luck (white screen of death)
 
 But if you build your app in a way that progressively enhances, where it's still functional as HTML, then parts of your app will still function
 -->
 
 ---
 
-# Good defaults & conventions
+# defaults & conventions
+
+<v-clicks>
 
 - SSR (returning real HTML)
   - using the load function
 - links to navigate
 - forms to submit data
 
+</v-clicks>
+
+<v-click>
+
 (defaults, not demands)
 
+</v-click>
+
 <!--
-SK encourages that through defaults and conventions
+so that's why SK encourages building your apps that way
+
+defaults are important, since most devs won't change the defaults. you want the right thing to be the easy thing.
+
+and in SK, the defaults are those that let you build a progressively enhanced experience, so your app doesn't completely white-screen in those 3% of cases where JS fails
+
+without SSR, your app is 100% reliant on JS. and maybe that's fine for your usecase
 
 everything we talked about how using the load function makes your app more efficient -- it also makes it more resilient, because data returned by the load function is able to be used for SSR
+
 
 these are defaults, not demands - you can opt-out if you want to
 
@@ -824,6 +881,7 @@ but by using them, you make your app more resilient, because the browser knows h
 
 the user can see your content and interact with it even when your JS is slow to load or fails entirely
 
+100% of your app doesn't need to work without JS. that's impossible. but just getting the basics working can go a long way
 -->
 
 ---
@@ -901,11 +959,11 @@ you can get an enhanced form with just one attribute. but if you want more contr
 ```svelte {all|15-21|5-9} {maxHeight:'470px'}
 <script>
   export let data;
-  let submission;
+  let isSubmitting = false;
 
   // when submitting, assume the submission has succeeded 
   // and the value is flipped
-  $: isFavorite = submission ? 
+  $: isFavorite = isSubmitting ? 
       !data.isFavorite : 
       data.isFavorite;
 </script>
@@ -914,10 +972,10 @@ you can get an enhanced form with just one attribute. but if you want more contr
 	action={isFavorite ? '?/unfavorite' : '?/favorite'}
 	method="POST"
 	use:enhance={(event) => {
-		submission = event.formData;
+		isSubmitting = true;
 		return async ({ update, result }) => {
 			await update();
-			submission = undefined;
+			isSubmitting = false;
 		};
 	}}
 >
@@ -932,9 +990,10 @@ here's one way to customize enhance to get optimistic UI
 
 normally: you click on a button, don't get feedback until the request completes
 
+[ demo the experience on sveltunes ]
+
 what if we assume it succeeds? change the state before the request happens
 
-demo the experience first on sveltunes
 -->
 
 ---
@@ -944,7 +1003,7 @@ demo the experience first on sveltunes
 - using forms, so our app is resilient
 - but all the data is reloaded after submission, which is not efficient
 
-TODO image
+<img src="/elephant.jpg" class="mt-4" width="500">
 
 <!--
 so we made our app more resilient using forms, but we've also made it less efficient
@@ -970,11 +1029,11 @@ but because we're not completely reloading the page, we're able to customize our
 	action={isFavorite ? '?/unfavorite' : '?/favorite'}
 	method="POST"
 	use:enhance={(event) => {
-		submission = event.formData;
+		isSubmitting = true;
 		return async ({ update, result }) => {
 -			await update();
 +			data.isFavorite = !data.isFavorite;
-			submission = undefined;
+			isSubmitting = false;
 		};
 	}}
 >
@@ -983,8 +1042,16 @@ but because we're not completely reloading the page, we're able to customize our
 <!--
 so the solution for this page is on the simpler side - instead of calling update, which performs SK's default data refresh behavior, we just update the data ourselves
 
-and there is some nuance here, but the example I want to focus on is actually the favorites page because that setup is more interesting. let's do some live coding 🫣
+and there is some nuance here, but the example I want to focus on is actually the favorites page because that setup is more interesting. let's do some live coding
+-->
 
+---
+layout: fact
+---
+
+# time for a bit of live coding 🫣
+
+<!--
 - demonstrate problem - you can't update the state of the layout
 - use store instead
 - then you can update the store
@@ -993,12 +1060,6 @@ and there is some nuance here, but the example I want to focus on is actually th
 
 so that's really bringing it all together - we're using a form so we make for a more resilient app, but also customizing that to load the minimum data necessary when the data changes
 -->
-
----
-layout: fact
----
-
-# time for a bit of live coding 🫣
 
 ---
 layout: fact
@@ -1018,6 +1079,8 @@ layout: two-cols
 
 # efficiency
 
+<v-clicks>
+
 - fetch before rendering 
 - don't overfetch (use layout loads for shared data)
 - fetch in parallel
@@ -1025,14 +1088,19 @@ layout: two-cols
 - avoid re-fetching
 - ship less JS
 
+</v-clicks>
+
 ::right::
 
 # resiliency
 
+<v-clicks>
+
 - JS is an enhancement
 - building on the web platform (links & forms)
   - but enhanced!
-- typesafety
+
+</v-clicks>
 
 <style>
   ul {
@@ -1048,8 +1116,8 @@ recap
 
 # Where to next?
 
-- the docs: svelte.dev / kit.svelte.dev
 - the tutorial: learn.svelte.dev
+- the docs: svelte.dev / kit.svelte.dev
 - Svelte discord: svelte.dev/chat
 
 ## my stuff
@@ -1089,3 +1157,7 @@ image: "/that/Session_Survey_Speaker.png"
     margin: 3rem auto 0 auto;
   }
 </style>
+
+<!--
+Note that talk title is old talk title
+-->
