@@ -425,7 +425,7 @@ compare this to how you'd do it in pure Svelte
 
 similar amount of code, but this will usually be less efficient
 
-that's the load function is able to start fetching data a lot sooner
+that's because the load function is able to start fetching data a lot sooner
 
 while the load function can start fetching data on the server, this fetch call won't happen until after the JS for the page has loaded and this component has fully mounted
 
@@ -696,13 +696,15 @@ but sometimes, your data can be slow
 
 example: artists page. the call to get the list of albums is very slow. and this can really make your navigation feel sluggish
 
-and it's not just client-side navigations - SK needs all the data for the page to server-side render it. which means if this is the first page your user visits, they might wait a while to see anything [ demonstrate by refreshing ]
+and it's not just client-side navigations - SK needs all the data for the page to server-side render it. which means if this is the first page your user visits, they might wait a while to see anything
 
 normally your data sources should be fast enough that this won't be a problem. but in case you have slow data, SK has a way to render the page without waiting for it to load: streamed promises
 
 remember how if we return promises, SK will automatically await them in parallel? well, that's only true at the top level. if the promise is nested, SK will not wait for it to resolve and return an actual Promise to the page
 
 and that means we can show a loading state instead of blocking navigation
+
+this will work on SSR too
 
 let's see an example [ show artist page example ]
 
